@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio Gallery</title>
+  <title>Portfolio</title>
   <style>
     :root {
       --bg: #121212;
@@ -29,13 +29,31 @@
 
     header {
       margin-bottom: 2.5rem;
-      text-align: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     header h1 {
       color: var(--accent);
       font-size: 2rem;
-      margin-bottom: 0.5rem;
+    }
+
+    nav button {
+      background: none;
+      border: 1px solid #444;
+      color: var(--text);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    nav button:hover {
+      background: #2a2a2a;
+      color: var(--accent);
+      border-color: #666;
     }
 
     .gallery {
@@ -76,7 +94,6 @@
 
     .gallery-item:hover img { scale: 1.03; }
 
-    /* Hover caption overlay on grid tiles */
     .caption-overlay {
       position: absolute;
       bottom: 0;
@@ -88,14 +105,8 @@
       transition: opacity 0.25s ease;
     }
 
-    .gallery-item:hover .caption-overlay {
-      opacity: 1;
-    }
-
-    .caption-overlay h3 {
-      font-size: 0.95rem;
-      color: #fff;
-    }
+    .gallery-item:hover .caption-overlay { opacity: 1; }
+    .caption-overlay h3 { font-size: 0.95rem; color: #fff; }
 
     #loading {
       text-align: center;
@@ -103,8 +114,8 @@
       color: #888;
     }
 
-    /* Lightbox Modal */
-    .lightbox {
+    /* Shared Modal Styles */
+    .modal {
       display: none;
       position: fixed;
       top: 0;
@@ -115,14 +126,24 @@
       z-index: 1000;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
       padding: 2rem;
     }
 
-    .lightbox.active {
-      display: flex;
+    .modal.active { display: flex; }
+
+    .modal-close {
+      position: absolute;
+      top: 1.5rem;
+      right: 2rem;
+      color: #fff;
+      font-size: 2.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      line-height: 1;
+      z-index: 1010;
     }
 
+    /* Lightbox Modal */
     .lightbox-content {
       display: flex;
       flex-direction: column;
@@ -146,28 +167,8 @@
       color: var(--text);
     }
 
-    .lightbox-meta h2 {
-      font-size: 1.25rem;
-      color: var(--accent);
-      margin-bottom: 0.25rem;
-    }
-
-    .lightbox-meta p {
-      font-size: 0.9rem;
-      color: #aaa;
-    }
-
-    .lightbox-close {
-      position: absolute;
-      top: 1.5rem;
-      right: 2rem;
-      color: #fff;
-      font-size: 2.5rem;
-      font-weight: bold;
-      cursor: pointer;
-      line-height: 1;
-      z-index: 1010;
-    }
+    .lightbox-meta h2 { font-size: 1.25rem; color: var(--accent); margin-bottom: 0.25rem; }
+    .lightbox-meta p { font-size: 0.9rem; color: #aaa; }
 
     .lightbox-btn {
       position: absolute;
@@ -185,12 +186,35 @@
       z-index: 1010;
     }
 
-    .lightbox-btn:hover {
-      background: rgba(255, 255, 255, 0.25);
-    }
-
+    .lightbox-btn:hover { background: rgba(255, 255, 255, 0.25); }
     .lightbox-prev { left: 1.5rem; }
     .lightbox-next { right: 1.5rem; }
+
+    /* About Modal */
+    .about-card {
+      background: var(--card-bg);
+      border: 1px solid #333;
+      padding: 2.5rem;
+      border-radius: 12px;
+      max-width: 550px;
+      width: 100%;
+      color: var(--text);
+    }
+
+    .about-card h2 {
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+
+    .about-card p {
+      margin-bottom: 1rem;
+      line-height: 1.6;
+      color: #ccc;
+    }
+
+    .about-card a {
+      color: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -198,6 +222,9 @@
   <div class="container">
     <header>
       <h1>Portfolio</h1>
+      <nav>
+        <button id="about-btn">About & Contact</button>
+      </nav>
     </header>
 
     <div id="loading">Loading images...</div>
@@ -205,8 +232,8 @@
   </div>
 
   <!-- Lightbox Modal -->
-  <div class="lightbox" id="lightbox">
-    <span class="lightbox-close" id="lightbox-close">&times;</span>
+  <div class="modal" id="lightbox">
+    <span class="modal-close" id="lightbox-close">&times;</span>
     <button class="lightbox-btn lightbox-prev" id="lightbox-prev">&#10094;</button>
     <div class="lightbox-content">
       <img class="lightbox-img" id="lightbox-img" src="" alt="Enlarged preview">
@@ -216,6 +243,16 @@
       </div>
     </div>
     <button class="lightbox-btn lightbox-next" id="lightbox-next">&#10095;</button>
+  </div>
+
+  <!-- About / Contact Modal -->
+  <div class="modal" id="about-modal">
+    <span class="modal-close" id="about-close">&times;</span>
+    <div class="about-card">
+      <h2>About Me</h2>
+      <p>Freelance Illustrator, Concept Artist & Comic Creator.</p>
+      <p><strong>Contact:</strong> <a href="mailto:your@email.com">your@email.com</a></p>
+    </div>
   </div>
 
   <script>
@@ -230,6 +267,7 @@
     let metadata = {};
     let currentIndex = 0;
 
+    // Lightbox Elements
     const lightbox = document.getElementById('lightbox');
     const lightboxImg = document.getElementById('lightbox-img');
     const lightboxTitle = document.getElementById('lightbox-title');
@@ -238,10 +276,17 @@
     const lightboxPrev = document.getElementById('lightbox-prev');
     const lightboxNext = document.getElementById('lightbox-next');
 
+    // About Elements
+    const aboutBtn = document.getElementById('about-btn');
+    const aboutModal = document.getElementById('about-modal');
+    const aboutClose = document.getElementById('about-close');
+
+    aboutBtn.addEventListener('click', () => aboutModal.classList.add('active'));
+    aboutClose.addEventListener('click', () => aboutModal.classList.remove('active'));
+
     function updateLightboxContent() {
       const item = imageList[currentIndex];
       lightboxImg.src = item.download_url;
-
       const info = metadata[item.name] || {};
       lightboxTitle.textContent = info.title || '';
       lightboxDesc.textContent = info.description || '';
@@ -273,15 +318,20 @@
     lightboxPrev.addEventListener('click', showPrev);
     lightboxNext.addEventListener('click', showNext);
 
-    lightbox.addEventListener('click', (e) => {
+    window.addEventListener('click', (e) => {
       if (e.target === lightbox || e.target.classList.contains('lightbox-content')) closeLightbox();
+      if (e.target === aboutModal) aboutModal.classList.remove('active');
     });
 
     document.addEventListener('keydown', (e) => {
-      if (!lightbox.classList.contains('active')) return;
-      if (e.key === 'ArrowLeft') showPrev();
-      if (e.key === 'ArrowRight') showNext();
-      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'Escape') {
+        closeLightbox();
+        aboutModal.classList.remove('active');
+      }
+      if (lightbox.classList.contains('active')) {
+        if (e.key === 'ArrowLeft') showPrev();
+        if (e.key === 'ArrowRight') showNext();
+      }
     });
 
     async function loadGallery() {
@@ -289,28 +339,24 @@
       const loading = document.getElementById('loading');
 
       try {
-        // Fetch metadata.json (if available)
         try {
           const metaRes = await fetch(metadataUrl);
           if (metaRes.ok) metadata = await metaRes.json();
         } catch (e) {
-          console.log('No metadata.json found or failed to load.');
+          console.log('No metadata.json found');
         }
 
-        // Fetch directory contents from GitHub API
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error('Could not fetch directory contents');
 
         const files = await response.json();
-
-        // Filter for images only (skips metadata.json and non-image files)
         const imageExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'];
+        
         imageList = files.filter(file => {
           const ext = file.name.split('.').pop().toLowerCase();
           return imageExtensions.includes(ext);
         });
 
-        // Sort alphabetically by filename
         imageList.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
 
         loading.style.display = 'none';
@@ -320,7 +366,6 @@
           return;
         }
 
-        // Render gallery
         imageList.forEach((file, index) => {
           const info = metadata[file.name] || {};
           const card = document.createElement('article');
@@ -341,657 +386,6 @@
 
       } catch (err) {
         loading.textContent = 'Error loading gallery images.';
-        console.error(err);
-      }
-    }
-
-    loadGallery();
-  </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio Gallery</title>
-  <style>
-    :root {
-      --bg: #121212;
-      --card-bg: #1e1e1e;
-      --text: #e0e0e0;
-      --accent: #ffffff;
-      --gap: 1.25rem;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, sans-serif;
-      padding: 2rem 1rem;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    header {
-      margin-bottom: 2.5rem;
-      text-align: center;
-    }
-
-    header h1 {
-      color: var(--accent);
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: var(--gap);
-    }
-
-    .gallery-item {
-      background-color: var(--card-bg);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid #2a2a2a;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .gallery-item:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-    }
-
-    .image-wrapper {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      overflow: hidden;
-    }
-
-    .image-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: scale 0.3s ease;
-    }
-
-    .gallery-item:hover img { scale: 1.03; }
-
-    #loading {
-      text-align: center;
-      padding: 2rem;
-      color: #888;
-    }
-
-    /* Lightbox Modal */
-    .lightbox {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.92);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      padding: 2rem;
-    }
-
-    .lightbox.active {
-      display: flex;
-    }
-
-    .lightbox-img {
-      max-width: 85vw;
-      max-height: 85vh;
-      object-fit: contain;
-      border-radius: 4px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.8);
-      user-select: none;
-    }
-
-    .lightbox-close {
-      position: absolute;
-      top: 1.5rem;
-      right: 2rem;
-      color: #fff;
-      font-size: 2.5rem;
-      font-weight: bold;
-      cursor: pointer;
-      line-height: 1;
-      z-index: 1010;
-    }
-
-    .lightbox-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      border: none;
-      font-size: 2rem;
-      padding: 1rem 1.25rem;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background 0.2s ease;
-      user-select: none;
-      z-index: 1010;
-    }
-
-    .lightbox-btn:hover {
-      background: rgba(255, 255, 255, 0.25);
-    }
-
-    .lightbox-prev { left: 1.5rem; }
-    .lightbox-next { right: 1.5rem; }
-  </style>
-</head>
-<body>
-
-  <div class="container">
-    <header>
-      <h1>Portfolio</h1>
-    </header>
-
-    <div id="loading">Loading images...</div>
-    <main class="gallery" id="gallery"></main>
-  </div>
-
-  <!-- Lightbox Modal -->
-  <div class="lightbox" id="lightbox">
-    <span class="lightbox-close" id="lightbox-close">&times;</span>
-    <button class="lightbox-btn lightbox-prev" id="lightbox-prev">&#10094;</button>
-    <img class="lightbox-img" id="lightbox-img" src="" alt="Enlarged preview">
-    <button class="lightbox-btn lightbox-next" id="lightbox-next">&#10095;</button>
-  </div>
-
-  <script>
-    const username = 'toyjaw01';
-    const repo = 'my_portfolio';
-    const folder = 'images';
-
-    const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
-
-    let imageList = [];
-    let currentIndex = 0;
-
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-    const lightboxClose = document.getElementById('lightbox-close');
-    const lightboxPrev = document.getElementById('lightbox-prev');
-    const lightboxNext = document.getElementById('lightbox-next');
-
-    function openLightbox(index) {
-      currentIndex = index;
-      lightboxImg.src = imageList[currentIndex].download_url;
-      lightbox.classList.add('active');
-    }
-
-    function closeLightbox() {
-      lightbox.classList.remove('active');
-    }
-
-    function showPrev() {
-      if (imageList.length === 0) return;
-      currentIndex = (currentIndex - 1 + imageList.length) % imageList.length;
-      lightboxImg.src = imageList[currentIndex].download_url;
-    }
-
-    function showNext() {
-      if (imageList.length === 0) return;
-      currentIndex = (currentIndex + 1) % imageList.length;
-      lightboxImg.src = imageList[currentIndex].download_url;
-    }
-
-    // UI Controls
-    lightboxClose.addEventListener('click', closeLightbox);
-    lightboxPrev.addEventListener('click', showPrev);
-    lightboxNext.addEventListener('click', showNext);
-
-    lightbox.addEventListener('click', (e) => {
-      if (e.target === lightbox) closeLightbox();
-    });
-
-    // Keyboard Arrow Navigation
-    document.addEventListener('keydown', (e) => {
-      if (!lightbox.classList.contains('active')) return;
-
-      if (e.key === 'ArrowLeft') {
-        showPrev();
-      } else if (e.key === 'ArrowRight') {
-        showNext();
-      } else if (e.key === 'Escape') {
-        closeLightbox();
-      }
-    });
-
-    async function loadGallery() {
-      const gallery = document.getElementById('gallery');
-      const loading = document.getElementById('loading');
-
-      try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error('Could not fetch directory contents');
-
-        const files = await response.json();
-
-        // Filter image extensions
-        const imageExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'];
-        imageList = files.filter(file => {
-          const ext = file.name.split('.').pop().toLowerCase();
-          return imageExtensions.includes(ext);
-        });
-
-        // Sort alphabetically by filename
-        imageList.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-
-        loading.style.display = 'none';
-
-        if (imageList.length === 0) {
-          gallery.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No images found in images/ folder.</p>';
-          return;
-        }
-
-        // Render gallery tiles
-        imageList.forEach((file, index) => {
-          const card = document.createElement('article');
-          card.className = 'gallery-item';
-          card.innerHTML = `
-            <div class="image-wrapper">
-              <img src="${file.download_url}" alt="Artwork" loading="lazy">
-            </div>
-          `;
-          
-          card.addEventListener('click', () => openLightbox(index));
-          gallery.appendChild(card);
-        });
-
-      } catch (err) {
-        loading.textContent = 'Error loading gallery images. Ensure the "images" folder exists in your repository.';
-        console.error(err);
-      }
-    }
-
-    loadGallery();
-  </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio Gallery</title>
-  <style>
-    :root {
-      --bg: #121212;
-      --card-bg: #1e1e1e;
-      --text: #e0e0e0;
-      --accent: #ffffff;
-      --gap: 1.25rem;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, sans-serif;
-      padding: 2rem 1rem;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    header {
-      margin-bottom: 2.5rem;
-      text-align: center;
-    }
-
-    header h1 {
-      color: var(--accent);
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: var(--gap);
-    }
-
-    .gallery-item {
-      background-color: var(--card-bg);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid #2a2a2a;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .gallery-item:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-    }
-
-    .image-wrapper {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      overflow: hidden;
-    }
-
-    .image-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: scale 0.3s ease;
-    }
-
-    .gallery-item:hover img { scale: 1.03; }
-
-    #loading {
-      text-align: center;
-      padding: 2rem;
-      color: #888;
-    }
-
-    /* Lightbox Modal */
-    .lightbox {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.9);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      padding: 2rem;
-    }
-
-    .lightbox.active {
-      display: flex;
-    }
-
-    .lightbox-img {
-      max-width: 90vw;
-      max-height: 90vh;
-      object-fit: contain;
-      border-radius: 4px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.8);
-    }
-
-    .lightbox-close {
-      position: absolute;
-      top: 1.5rem;
-      right: 2rem;
-      color: #fff;
-      font-size: 2.5rem;
-      font-weight: bold;
-      cursor: pointer;
-      line-height: 1;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="container">
-    <header>
-      <h1>Portfolio</h1>
-    </header>
-
-    <div id="loading">Loading images...</div>
-    <main class="gallery" id="gallery"></main>
-  </div>
-
-  <!-- Lightbox Modal Container -->
-  <div class="lightbox" id="lightbox">
-    <span class="lightbox-close" id="lightbox-close">&times;</span>
-    <img class="lightbox-img" id="lightbox-img" src="" alt="Enlarged preview">
-  </div>
-
-  <script>
-    const username = 'toyjaw01';
-    const repo = 'my_portfolio';
-    const folder = 'images';
-
-    const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
-
-    // Lightbox elements
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-    const lightboxClose = document.getElementById('lightbox-close');
-
-    lightboxClose.addEventListener('click', () => lightbox.classList.remove('active'));
-    lightbox.addEventListener('click', (e) => {
-      if (e.target === lightbox) lightbox.classList.remove('active');
-    });
-
-    async function loadGallery() {
-      const gallery = document.getElementById('gallery');
-      const loading = document.getElementById('loading');
-
-      try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error('Could not fetch directory contents');
-
-        const files = await response.json();
-
-        // Filter for image files
-        const imageExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'];
-        let imageFiles = files.filter(file => {
-          const ext = file.name.split('.').pop().toLowerCase();
-          return imageExtensions.includes(ext);
-        });
-
-        // Sort alphabetically by filename
-        imageFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-
-        loading.style.display = 'none';
-
-        if (imageFiles.length === 0) {
-          gallery.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No images found in images/ folder.</p>';
-          return;
-        }
-
-        // Render clean image cards without filenames
-        imageFiles.forEach(file => {
-          const card = document.createElement('article');
-          card.className = 'gallery-item';
-          card.innerHTML = `
-            <div class="image-wrapper">
-              <img src="${file.download_url}" alt="Artwork" loading="lazy">
-            </div>
-          `;
-          
-          // Open lightbox on click
-          card.addEventListener('click', () => {
-            lightboxImg.src = file.download_url;
-            lightbox.classList.add('active');
-          });
-
-          gallery.appendChild(card);
-        });
-
-      } catch (err) {
-        loading.textContent = 'Error loading gallery images. Ensure the "images" folder exists in your repository.';
-        console.error(err);
-      }
-    }
-
-    loadGallery();
-  </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio Gallery</title>
-  <style>
-    :root {
-      --bg: #121212;
-      --card-bg: #1e1e1e;
-      --text: #e0e0e0;
-      --accent: #ffffff;
-      --gap: 1.25rem;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, sans-serif;
-      padding: 2rem 1rem;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    header {
-      margin-bottom: 2.5rem;
-      text-align: center;
-    }
-
-    header h1 {
-      color: var(--accent);
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: var(--gap);
-    }
-
-    .gallery-item {
-      background-color: var(--card-bg);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid #2a2a2a;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .gallery-item:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-    }
-
-    .image-wrapper {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      overflow: hidden;
-    }
-
-    .image-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: scale 0.3s ease;
-    }
-
-    .gallery-item:hover img { scale: 1.03; }
-
-    .item-info {
-      padding: 0.75rem 1rem;
-    }
-
-    .item-info h3 {
-      font-size: 0.95rem;
-      color: var(--accent);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    #loading {
-      text-align: center;
-      padding: 2rem;
-      color: #888;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="container">
-    <header>
-      <h1>Portfolio</h1>
-      <p>Gallery</p>
-    </header>
-
-    <div id="loading">Loading images...</div>
-    <main class="gallery" id="gallery"></main>
-  </div>
-
-  <script>
-    const username = 'toyjaw01';
-    const repo = 'my_portfolio';
-    const folder = 'images';
-
-    const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
-
-    async function loadGallery() {
-      const gallery = document.getElementById('gallery');
-      const loading = document.getElementById('loading');
-
-      try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error('Could not fetch directory contents');
-
-        const files = await response.json();
-
-        // Filter for image files
-        const imageExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'];
-        let imageFiles = files.filter(file => {
-          const ext = file.name.split('.').pop().toLowerCase();
-          return imageExtensions.includes(ext);
-        });
-
-        // Sort alphabetically by filename
-        imageFiles.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-
-        loading.style.display = 'none';
-
-        if (imageFiles.length === 0) {
-          gallery.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No images found in images/ folder.</p>';
-          return;
-        }
-
-        // Render images
-        imageFiles.forEach(file => {
-          const title = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-          
-          const card = document.createElement('article');
-          card.className = 'gallery-item';
-          card.innerHTML = `
-            <div class="image-wrapper">
-              <img src="${file.download_url}" alt="${title}" loading="lazy">
-            </div>
-            <div class="item-info">
-              <h3>${title}</h3>
-            </div>
-          `;
-          gallery.appendChild(card);
-        });
-
-      } catch (err) {
-        loading.textContent = 'Error loading gallery images. Ensure the "images" folder exists in your repository.';
         console.error(err);
       }
     }
