@@ -254,240 +254,8 @@
 
     <div id="loading">Loading images...</div>
     <main class="gallery" id="gallery"></main>
-  </div><!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio</title>
-  <style>
-    :root {
-      --bg: #121212;
-      --card-bg: #1e1e1e;
-      --text: #e0e0e0;
-      --accent: #ffffff;
-      --gap: 1.25rem;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, sans-serif;
-      padding: 2rem 1rem;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    header {
-      margin-bottom: 2.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    header h1 {
-      color: var(--accent);
-      font-size: 2rem;
-    }
-
-    nav button {
-      background: none;
-      border: 1px solid #444;
-      color: var(--text);
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-    }
-
-    nav button:hover {
-      background: #2a2a2a;
-      color: var(--accent);
-      border-color: #666;
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: var(--gap);
-    }
-
-    .gallery-item {
-      background-color: var(--card-bg);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid #2a2a2a;
-      cursor: pointer;
-      position: relative;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .gallery-item:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-    }
-
-    .image-wrapper {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .image-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: scale 0.3s ease;
-    }
-
-    .gallery-item:hover img { scale: 1.03; }
-
-    .caption-overlay {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: linear-gradient(transparent, rgba(0,0,0,0.85));
-      padding: 1.5rem 1rem 0.75rem;
-      opacity: 0;
-      transition: opacity 0.25s ease;
-    }
-
-    .gallery-item:hover .caption-overlay { opacity: 1; }
-    .caption-overlay h3 { font-size: 0.95rem; color: #fff; }
-
-    #loading {
-      text-align: center;
-      padding: 2rem;
-      color: #888;
-    }
-
-    /* Shared Modal Styles */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.92);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-      padding: 2rem;
-    }
-
-    .modal.active { display: flex; }
-
-    .modal-close {
-      position: absolute;
-      top: 1.5rem;
-      right: 2rem;
-      color: #fff;
-      font-size: 2.5rem;
-      font-weight: bold;
-      cursor: pointer;
-      line-height: 1;
-      z-index: 1010;
-    }
-
-    /* Lightbox Modal */
-    .lightbox-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      max-width: 85vw;
-      max-height: 85vh;
-    }
-
-    .lightbox-img {
-      max-width: 100%;
-      max-height: 75vh;
-      object-fit: contain;
-      border-radius: 4px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.8);
-      user-select: none;
-    }
-
-    .lightbox-meta {
-      text-align: center;
-      margin-top: 1rem;
-      color: var(--text);
-    }
-
-    .lightbox-meta h2 { font-size: 1.25rem; color: var(--accent); margin-bottom: 0.25rem; }
-    .lightbox-meta p { font-size: 0.9rem; color: #aaa; }
-
-    .lightbox-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      border: none;
-      font-size: 2rem;
-      padding: 1rem 1.25rem;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background 0.2s ease;
-      user-select: none;
-      z-index: 1010;
-    }
-
-    .lightbox-btn:hover { background: rgba(255, 255, 255, 0.25); }
-    .lightbox-prev { left: 1.5rem; }
-    .lightbox-next { right: 1.5rem; }
-
-    /* About Modal */
-    .about-card {
-      background: var(--card-bg);
-      border: 1px solid #333;
-      padding: 2.5rem;
-      border-radius: 12px;
-      max-width: 550px;
-      width: 100%;
-      color: var(--text);
-    }
-
-    .about-card h2 {
-      color: var(--accent);
-      margin-bottom: 1rem;
-    }
-
-    .about-card p {
-      margin-bottom: 1rem;
-      line-height: 1.6;
-      color: #ccc;
-    }
-
-    .about-card a {
-      color: var(--accent);
-    }
-  </style>
-</head>
-<body>
-
-  <div class="container">
-    <header>
-      <h1>Portfolio</h1>
-      <nav>
-        <button id="about-btn">About & Contact</button>
-      </nav>
-    </header>
-
-    <div id="loading">Loading images...</div>
-    <main class="gallery" id="gallery"></main>
   </div>
 
-  <!-- Lightbox Modal -->
   <div class="modal" id="lightbox">
     <span class="modal-close" id="lightbox-close">&times;</span>
     <button class="lightbox-btn lightbox-prev" id="lightbox-prev">&#10094;</button>
@@ -501,7 +269,6 @@
     <button class="lightbox-btn lightbox-next" id="lightbox-next">&#10095;</button>
   </div>
 
-  <!-- About / Contact Modal -->
   <div class="modal" id="about-modal">
     <span class="modal-close" id="about-close">&times;</span>
     <div class="about-card">
@@ -589,6 +356,25 @@
         if (e.key === 'ArrowRight') showNext();
       }
     });
+
+    // Touch Swipe Support for Mobile
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    lightbox.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, false);
+
+    lightbox.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleSwipe();
+    }, false);
+
+    function handleSwipe() {
+      const threshold = 50; // Minimum distance for swipe
+      if (touchEndX < touchStartX - threshold) showNext();
+      if (touchEndX > touchStartX + threshold) showPrev();
+    }
 
     async function loadGallery() {
       const gallery = document.getElementById('gallery');
