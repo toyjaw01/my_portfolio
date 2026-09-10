@@ -1,84 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Portfolio | Creative Work</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Name - Portfolio</title>
+  <style>
+    :root {
+      --bg: #121212;
+      --text: #e0e0e0;
+      --accent: #ffffff;
+      --card-bg: #1e1e1e;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    header {
+      margin-bottom: 3rem;
+    }
+    h1 {
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #333;
+    }
+    .card img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .card-body {
+      padding: 1rem;
+    }
+    footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid #333;
+      font-size: 0.9rem;
+    }
+    a { color: var(--accent); }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <header>
+      <h1>Your Name</h1>
+      <p>Brief title or bio summarizing your work and focus.</p>
+    </header>
 
-  <!-- Navigation -->
-  <nav class="navbar">
-    <div class="logo">PORTFOLIO</div>
-    <ul class="nav-links">
-      <li><a href="#work">Work</a></li>
-      <li><a href="#about">About</a></li>
-      <li><a href="#contact">Contact</a></li>
-    </ul>
-  </nav>
-
-  <!-- Hero Section -->
-  <header class="hero">
-    <h1>Creative Visual Artist & Developer</h1>
-    <p>Specializing in digital illustration, comic art, and custom graphics.</p>
-    <a href="#work" class="btn">View Work</a>
-  </header>
-
-  <!-- Portfolio / Work Section -->
-  <section id="work" class="section">
-    <h2>Featured Projects</h2>
-    <div class="grid">
-      <!-- Project Card 1 -->
-      <article class="card">
-        <div class="card-image" style="background-image: url('https://picsum.photos/600/400?random=1');"></div>
-        <div class="card-content">
-          <h3>Project Title One</h3>
-          <p>Digital illustration and character design created for a sequential story project.</p>
-          <span class="tag">Illustration</span>
+    <main>
+      <h2>Featured Work</h2>
+      <div class="grid">
+        <div class="card">
+          <img src="https://via.placeholder.com/600x400" alt="Project 1">
+          <div class="card-body">
+            <h3>Project Title</h3>
+            <p>Short description of the project, tools used, or role.</p>
+          </div>
         </div>
-      </article>
+        <!-- Add more cards as needed -->
+      </div>
+    </main>
 
-      <!-- Project Card 2 -->
-      <article class="card">
-        <div class="card-image" style="background-image: url('https://picsum.photos/600/400?random=2');"></div>
-        <div class="card-content">
-          <h3>Project Title Two</h3>
-          <p>Algorithmic visual artwork and generative tools built with Processing and JavaScript.</p>
-          <span class="tag">Graphics / Code</span>
-        </div>
-      </article>
-
-      <!-- Project Card 3 -->
-      <article class="card">
-        <div class="card-image" style="background-image: url('https://picsum.photos/600/400?random=3');"></div>
-        <div class="card-content">
-          <h3>Project Title Three</h3>
-          <p>Comic production, line art cleanup, and panel layout pipeline development.</p>
-          <span class="tag">Comic Art</span>
-        </div>
-      </article>
-    </div>
-  </section>
-
-  <!-- About Section -->
-  <section id="about" class="section alt-bg">
-    <h2>About Me</h2>
-    <div class="about-content">
-      <p>I focus on crafting visual narratives, traditional and digital artwork, and creative software workflows. My focus spans comic creation, digital painting, and custom tool building.</p>
-    </div>
-  </section>
-
-  <!-- Contact Section -->
-  <section id="contact" class="section">
-    <h2>Get in Touch</h2>
-    <p>Interested in collaborating or discussing a project?</p>
-    <a href="mailto:your-email@example.com" class="btn">Send an Email</a>
-  </section>
-
-  <footer>
-    <p>&copy; 2026. All rights reserved.</p>
-  </footer>
-
+    <footer>
+      <p>Contact: <a href="mailto:your@email.com">your@email.com</a> | <a href="#">Social/Platform Link</a></p>
+    </footer>
+  </div>
 </body>
 </html>
