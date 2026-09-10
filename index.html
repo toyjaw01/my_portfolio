@@ -1,114 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portfolio</title>
-  <style>
-    :root {
-      --bg: #121212;
-      --card-bg: #1e1e1e;
-      --text: #e0e0e0;
-      --accent: #ffffff;
-      --gap: 1.25rem;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, sans-serif;
-      padding: 2rem 1rem;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    header {
-      margin-bottom: 2.5rem;
-      text-align: center;
-    }
-
-    header h1 {
-      color: var(--accent);
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: var(--gap);
-    }
-
-    .gallery-item {
-      background-color: var(--card-bg);
-      border-radius: 8px;
-      overflow: hidden;
-      border: 1px solid #2a2a2a;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .gallery-item:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-    }
-
-    .image-wrapper {
-      width: 100%;
-      aspect-ratio: 4 / 3;
-      overflow: hidden;
-    }
-
-    .image-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: scale 0.3s ease;
-    }
-
-    .gallery-item:hover img { scale: 1.03; }
-
-    .item-info {
-      padding: 0.75rem 1rem;
-    }
-
-    .item-info h3 {
-      font-size: 0.95rem;
-      color: var(--accent);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    #loading {
-      text-align: center;
-      padding: 2rem;
-      color: #888;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="container">
-    <header>
-      <h1>Portfolio</h1>
-      <p>Gallery</p>
-    </header>
-
-    <div id="loading">Loading images...</div>
-    <main class="gallery" id="gallery"></main>
-  </div>
-
-  <!-- JAVASCRIPT GOES HERE -->
-  <script>
-    // Update these 3 variables with your exact GitHub details:
-    const username = 'YOUR_GITHUB_USERNAME';
-    const repo = 'YOUR_REPO_NAME';
+<script>
+    const username = 'toyjaw01';
+    const repo = 'my_portfolio';
     const folder = 'images';
 
     const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
@@ -158,12 +50,10 @@
         });
 
       } catch (err) {
-        loading.textContent = 'Error loading gallery images.';
+        loading.textContent = 'Error loading gallery images. Ensure the "images" folder exists in your repository.';
         console.error(err);
       }
     }
 
     loadGallery();
   </script>
-</body>
-</html>
