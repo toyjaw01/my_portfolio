@@ -50,6 +50,356 @@
       overflow: hidden;
       border: 1px solid #2a2a2a;
       cursor: pointer;
+      position: relative;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .image-wrapper {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: scale 0.3s ease;
+    }
+
+    .gallery-item:hover img { scale: 1.03; }
+
+    /* Hover caption overlay on grid tiles */
+    .caption-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+      padding: 1.5rem 1rem 0.75rem;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .gallery-item:hover .caption-overlay {
+      opacity: 1;
+    }
+
+    .caption-overlay h3 {
+      font-size: 0.95rem;
+      color: #fff;
+    }
+
+    #loading {
+      text-align: center;
+      padding: 2rem;
+      color: #888;
+    }
+
+    /* Lightbox Modal */
+    .lightbox {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.92);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      padding: 2rem;
+    }
+
+    .lightbox.active {
+      display: flex;
+    }
+
+    .lightbox-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 85vw;
+      max-height: 85vh;
+    }
+
+    .lightbox-img {
+      max-width: 100%;
+      max-height: 75vh;
+      object-fit: contain;
+      border-radius: 4px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.8);
+      user-select: none;
+    }
+
+    .lightbox-meta {
+      text-align: center;
+      margin-top: 1rem;
+      color: var(--text);
+    }
+
+    .lightbox-meta h2 {
+      font-size: 1.25rem;
+      color: var(--accent);
+      margin-bottom: 0.25rem;
+    }
+
+    .lightbox-meta p {
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 1.5rem;
+      right: 2rem;
+      color: #fff;
+      font-size: 2.5rem;
+      font-weight: bold;
+      cursor: pointer;
+      line-height: 1;
+      z-index: 1010;
+    }
+
+    .lightbox-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border: none;
+      font-size: 2rem;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s ease;
+      user-select: none;
+      z-index: 1010;
+    }
+
+    .lightbox-btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .lightbox-prev { left: 1.5rem; }
+    .lightbox-next { right: 1.5rem; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Portfolio</h1>
+    </header>
+
+    <div id="loading">Loading images...</div>
+    <main class="gallery" id="gallery"></main>
+  </div>
+
+  <!-- Lightbox Modal -->
+  <div class="lightbox" id="lightbox">
+    <span class="lightbox-close" id="lightbox-close">&times;</span>
+    <button class="lightbox-btn lightbox-prev" id="lightbox-prev">&#10094;</button>
+    <div class="lightbox-content">
+      <img class="lightbox-img" id="lightbox-img" src="" alt="Enlarged preview">
+      <div class="lightbox-meta">
+        <h2 id="lightbox-title"></h2>
+        <p id="lightbox-desc"></p>
+      </div>
+    </div>
+    <button class="lightbox-btn lightbox-next" id="lightbox-next">&#10095;</button>
+  </div>
+
+  <script>
+    const username = 'toyjaw01';
+    const repo = 'my_portfolio';
+    const folder = 'images';
+
+    const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/${folder}`;
+    const metadataUrl = `https://raw.githubusercontent.com/${username}/${repo}/main/${folder}/metadata.json`;
+
+    let imageList = [];
+    let metadata = {};
+    let currentIndex = 0;
+
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxTitle = document.getElementById('lightbox-title');
+    const lightboxDesc = document.getElementById('lightbox-desc');
+    const lightboxClose = document.getElementById('lightbox-close');
+    const lightboxPrev = document.getElementById('lightbox-prev');
+    const lightboxNext = document.getElementById('lightbox-next');
+
+    function updateLightboxContent() {
+      const item = imageList[currentIndex];
+      lightboxImg.src = item.download_url;
+
+      const info = metadata[item.name] || {};
+      lightboxTitle.textContent = info.title || '';
+      lightboxDesc.textContent = info.description || '';
+    }
+
+    function openLightbox(index) {
+      currentIndex = index;
+      updateLightboxContent();
+      lightbox.classList.add('active');
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('active');
+    }
+
+    function showPrev() {
+      if (imageList.length === 0) return;
+      currentIndex = (currentIndex - 1 + imageList.length) % imageList.length;
+      updateLightboxContent();
+    }
+
+    function showNext() {
+      if (imageList.length === 0) return;
+      currentIndex = (currentIndex + 1) % imageList.length;
+      updateLightboxContent();
+    }
+
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightboxPrev.addEventListener('click', showPrev);
+    lightboxNext.addEventListener('click', showNext);
+
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox || e.target.classList.contains('lightbox-content')) closeLightbox();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (!lightbox.classList.contains('active')) return;
+      if (e.key === 'ArrowLeft') showPrev();
+      if (e.key === 'ArrowRight') showNext();
+      if (e.key === 'Escape') closeLightbox();
+    });
+
+    async function loadGallery() {
+      const gallery = document.getElementById('gallery');
+      const loading = document.getElementById('loading');
+
+      try {
+        // Fetch metadata.json (if available)
+        try {
+          const metaRes = await fetch(metadataUrl);
+          if (metaRes.ok) metadata = await metaRes.json();
+        } catch (e) {
+          console.log('No metadata.json found or failed to load.');
+        }
+
+        // Fetch directory contents from GitHub API
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error('Could not fetch directory contents');
+
+        const files = await response.json();
+
+        // Filter for images only (skips metadata.json and non-image files)
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'];
+        imageList = files.filter(file => {
+          const ext = file.name.split('.').pop().toLowerCase();
+          return imageExtensions.includes(ext);
+        });
+
+        // Sort alphabetically by filename
+        imageList.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+
+        loading.style.display = 'none';
+
+        if (imageList.length === 0) {
+          gallery.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No images found in images/ folder.</p>';
+          return;
+        }
+
+        // Render gallery
+        imageList.forEach((file, index) => {
+          const info = metadata[file.name] || {};
+          const card = document.createElement('article');
+          card.className = 'gallery-item';
+
+          const titleHTML = info.title ? `<div class="caption-overlay"><h3>${info.title}</h3></div>` : '';
+
+          card.innerHTML = `
+            <div class="image-wrapper">
+              <img src="${file.download_url}" alt="${info.title || 'Artwork'}" loading="lazy">
+              ${titleHTML}
+            </div>
+          `;
+          
+          card.addEventListener('click', () => openLightbox(index));
+          gallery.appendChild(card);
+        });
+
+      } catch (err) {
+        loading.textContent = 'Error loading gallery images.';
+        console.error(err);
+      }
+    }
+
+    loadGallery();
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Gallery</title>
+  <style>
+    :root {
+      --bg: #121212;
+      --card-bg: #1e1e1e;
+      --text: #e0e0e0;
+      --accent: #ffffff;
+      --gap: 1.25rem;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      text-align: center;
+    }
+
+    header h1 {
+      color: var(--accent);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--gap);
+    }
+
+    .gallery-item {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #2a2a2a;
+      cursor: pointer;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
